@@ -9,8 +9,9 @@ package appconsole;
 
 import java.util.ArrayList;
 
+import modelo.Grupo;
+import modelo.Individual;
 import modelo.Mensagem;
-import modelo.Participante;
 import regras_negocio.Fachada;
 
 public class Teste1 {
@@ -50,8 +51,8 @@ public class Teste1 {
 			System.out.println(m);
 
 		System.out.println("\nlistar individuos ");
-		for(Participante p : Fachada.listarIndividuos())
-			System.out.println(p);
+		for(Individual ind : Fachada.listarIndividuos())
+			System.out.println(ind);
 
 		try {
 			System.out.println("\nconversa entre joao e maria");
@@ -149,17 +150,26 @@ public class Teste1 {
 			System.out.println(m);
 
 		System.out.println("\nlistar individuos finais");
-		for(Participante p : Fachada.listarIndividuos())
-			System.out.println(p);
+		for(Individual ind : Fachada.listarIndividuos())
+			System.out.println(ind);
 
 		System.out.println("\nlistar grupos finais");
-		for(Participante p : Fachada.listarGrupos())
-			System.out.println(p);
+		for(Grupo g : Fachada.listarGrupos())
+			System.out.println(g);
 
+		/**
+		 * ADMINISTRADOR
+		 */
+		
 		System.out.println("\n*******************************************************");
 		try {
-			System.out.println("ESPIONAR");
 			Fachada.criarAdministrador("admin", "admin");
+		} catch (Exception e) 	{
+			System.out.println(e.getMessage());
+		}
+		
+		try {
+			System.out.println("ESPIONAR");
 			for(Mensagem m : Fachada.espionarMensagens("admin", "projeto"))
 				System.out.println(m);
 			

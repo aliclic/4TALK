@@ -7,11 +7,36 @@ public class Participante {
 	private ArrayList<Mensagem> recebidas;
 	private ArrayList<Mensagem> enviadas;
 	
+	
 	public Participante(String nome) {
 		super();
 		this.nome = nome;
 	}
-
+	
+	public void adicionarEnviada(Mensagem msg) {
+		enviadas.add(msg);
+	}
+	
+	public void removerEnviada(Mensagem msg) {
+		enviadas.remove(msg);
+	}
+	
+	public Mensagem localizarEnviada(int id) {
+		for(Mensagem m : enviadas) {
+			if(m.getId() == id)
+				return m;
+		}
+		return null;
+	}
+	
+	public void adicionarRecebida(Mensagem msg) {
+		recebidas.add(msg);
+	}
+	
+	public void removerRecebida(Mensagem msg) {
+		recebidas.remove(msg);
+	}
+	
 	public String getNome() {
 		return nome;
 	}

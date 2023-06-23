@@ -31,12 +31,15 @@ public class Repositorio {
 		participantes.put(g.getNome(), g);
 	}
 	
-	private void adicionar(Mensagem m) {
+	public void adicionar(Mensagem m) {
 		mensagens.put(m.getId(), m);
-		
 	}
 	
-	private Individual localizarIndividual(String nome) {
+	public void remover(Mensagem m) {
+		mensagens.remove(m.getId());
+	}
+	
+	public Individual localizarIndividual(String nome) {
 		for(Participante p : participantes.values()) {
 			if(p instanceof Individual i && i.getNome().equals(nome))
 				return i;
@@ -44,7 +47,15 @@ public class Repositorio {
 		return null;
 	}
 	
-	private Participante localizarParticipante(String nome) {
+	public Grupo localizarGrupo(String nome) {
+		for(Participante p : participantes.values()) {
+			if(p instanceof Grupo g && g.getNome().equals(nome))
+				return g;
+		}
+		return null;
+	}
+	
+	public Participante localizarParticipante(String nome) {
 		for(Participante p : participantes.values()) {
 			if(p.getNome().equals(nome))
 				return p;
@@ -52,7 +63,17 @@ public class Repositorio {
 		return null;
 	}
 	
-	private ArrayList<Individual> getIndividuos() {
+	public ArrayList<Participante> getParticipantes() {
+		ArrayList<Participante> aux_participantes = new ArrayList<>();
+		
+		for(Participante p : participantes.values()) {
+			aux_participantes.add(p);
+		}
+		
+		return aux_participantes;
+	}
+	
+	public ArrayList<Individual> getIndividuos() {
 		ArrayList<Individual> individuos = new ArrayList<>();
 		
 		for(Participante p : participantes.values()) {
@@ -62,7 +83,7 @@ public class Repositorio {
 		return individuos;
 	}
 	
-	private ArrayList<Grupo> getGrupos() {
+	public ArrayList<Grupo> getGrupos() {
 		ArrayList<Grupo> grupos = new ArrayList<>();
 		
 		for(Participante p : participantes.values()) {
@@ -70,6 +91,15 @@ public class Repositorio {
 				grupos.add(g);
 		}
 		return grupos;
+	}
+	
+	public ArrayList<Mensagem> getMensagens() {
+		ArrayList<Mensagem> aux_mensagens = new ArrayList<>();
+		
+		for(Mensagem m : mensagens.values()) {
+			aux_mensagens.add(m);
+		}
+		return aux_mensagens;
 	}
 	
 	
@@ -213,5 +243,6 @@ public class Repositorio {
 			throw new RuntimeException("problema na cria��o do arquivo  grupos "+e.getMessage());
 		}
 	}
+
 }
 

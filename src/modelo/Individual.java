@@ -12,7 +12,23 @@ public class Individual extends Participante {
 		this.senha = senha;
 		this.administrador = administrador;
 	}
+	
+	public void adicionar(Grupo g) {
+		grupos.add(g);
+	}
+	
+	public void remover(Grupo g) {
+		grupos.remove(g);
+	}
 
+	public Grupo localizarGrupo(String nomegrupo) {
+		for(Grupo g : grupos) {
+			if(g.getNome().equals(nomegrupo))
+				return g;
+		}
+		return null;
+	}
+	
 	public String getSenha() {
 		return senha;
 	}

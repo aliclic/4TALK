@@ -11,7 +11,10 @@ public class Grupo extends Participante {
 	
 	public void adicionar(Individual i) {
 		individuos.add(i);
-		
+	}
+	
+	public void remover(Individual i) {
+		individuos.remove(i);
 	}
 
 	public ArrayList<Individual> getIndividuos() {

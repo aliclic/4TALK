@@ -292,10 +292,10 @@ public class Fachada {
 			throw new Exception("ausentes - " + nomeadministrador + " nao é um administrador!");
 		
 		//listar os nomes dos participante que nao enviaram mensagens
-		ArrayList<Individual> users = repositorio.getIndividuos();
+		ArrayList<Participante> users = repositorio.getParticipantes();
 		ArrayList<String> lista = new ArrayList<>();
 		
-		for(Individual i : users) {
+		for(Participante i : users) {
 			if(i.getEnviadas().isEmpty()) {
 				lista.add(i.getNome());
 			}

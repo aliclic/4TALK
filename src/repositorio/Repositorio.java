@@ -1,13 +1,9 @@
 package repositorio;
-/**********************************
- * IFPB - Curso Superior de Tec. em Sist. para Internet
- * Programa��o Orientada a Objetos
- * Prof. Fausto Maranh�o Ayres
- **********************************/
-
 
 import java.io.File;
 import java.io.FileWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -20,8 +16,27 @@ import modelo.Participante;
 
 public class Repositorio {
 	
-	private TreeMap<String, Participante> participantes;
-	private TreeMap<Integer, Mensagem> mensagens;
+	private TreeMap<String, Participante> participantes = new TreeMap<>();
+	private ArrayList<Mensagem> mensagens = new ArrayList<>();
+	
+	
+	public Repositorio() {
+		this.carregarObjetos();
+	}
+	
+	public int GerarId() {
+		if(mensagens.isEmpty()) {
+			return 1;
+		}
+		
+		Integer ult_id = mensagens.get(mensagens.size()-1).getId();
+		return ult_id + 1;
+	}
+	
+	public void adicionar(Participante participante) {
+		// TODO Auto-generated method stub
+		participantes.put(participante.getNome(), participante);
+	}
 	
 	public void adicionar(Individual i) {
 		participantes.put(i.getNome(), i);
@@ -32,11 +47,11 @@ public class Repositorio {
 	}
 	
 	public void adicionar(Mensagem m) {
-		mensagens.put(m.getId(), m);
+		mensagens.add(m);
 	}
 	
 	public void remover(Mensagem m) {
-		mensagens.remove(m.getId());
+		mensagens.remove(m);
 	}
 	
 	public Individual localizarIndividual(String nome) {
@@ -55,6 +70,14 @@ public class Repositorio {
 		return null;
 	}
 	
+	public Mensagem localizarMensagem(Integer id) {
+		for(Mensagem m : mensagens) {
+			if(m.getId() == id)
+				return m;
+		}
+		return null;
+	}
+	
 	public Participante localizarParticipante(String nome) {
 		for(Participante p : participantes.values()) {
 			if(p.getNome().equals(nome))
@@ -63,14 +86,8 @@ public class Repositorio {
 		return null;
 	}
 	
-	public ArrayList<Participante> getParticipantes() {
-		ArrayList<Participante> aux_participantes = new ArrayList<>();
-		
-		for(Participante p : participantes.values()) {
-			aux_participantes.add(p);
-		}
-		
-		return aux_participantes;
+	public TreeMap<String, Participante> getParticipantes() {
+		return participantes;
 	}
 	
 	public ArrayList<Individual> getIndividuos() {
@@ -94,12 +111,7 @@ public class Repositorio {
 	}
 	
 	public ArrayList<Mensagem> getMensagens() {
-		ArrayList<Mensagem> aux_mensagens = new ArrayList<>();
-		
-		for(Mensagem m : mensagens.values()) {
-			aux_mensagens.add(m);
-		}
-		return aux_mensagens;
+		return mensagens;
 	}
 	
 	
@@ -161,6 +173,7 @@ public class Repositorio {
 					for(int i=1; i< partes.length; i++) {
 						individuo = this.localizarIndividual(partes[i]);
 						grupo.adicionar(individuo);
+						individuo.adicionar(grupo);
 					}
 				this.adicionar(grupo);
 			}
@@ -172,48 +185,60 @@ public class Repositorio {
 
 
 		try	{
-			String id, nomeemitente, nomedestinatario,texto;
+			String nomeemitente, nomedestinatario,texto;
+			int id;
+			LocalDateTime datahora;
 			Mensagem m;
 			Participante emitente,destinatario;
 			File f = new File( new File(".\\mensagens.csv").getCanonicalPath() )  ;
 			Scanner arquivo3 = new Scanner(f);	 //  pasta do projeto
+			String inputFormat = "yyyy-MM-dd'T'HH:mm:ss";
+	        String outputFormat = "dd/MM/yyyy HH:mm:ss";
+
+	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern(inputFormat);
+	        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(outputFormat);
 			while(arquivo3.hasNextLine()) 	{
 				linha = arquivo3.nextLine().trim();		
 				partes = linha.split(";");	
 				//System.out.println(Arrays.toString(partes));
-				id = partes[0];
-				nomeemitente = partes[1];
-				nomedestinatario = partes[2];
-				texto = partes[3];
+				id = Integer.parseInt(partes[0]);
+				texto = partes[1];
+				nomeemitente = partes[2];
+				nomedestinatario = partes[3];
+				LocalDateTime dateTime = LocalDateTime.parse(partes[4], inputFormatter);
+		        String formattedOutputDate = dateTime.format(outputFormatter);
+				datahora = LocalDateTime.parse(formattedOutputDate, outputFormatter);
 				emitente = this.localizarParticipante(nomeemitente);
 				destinatario = this.localizarParticipante(nomedestinatario);
-				m = new Mensagem(Integer.parseInt(id),emitente,destinatario,texto);
+				m = new Mensagem(id,texto,emitente,destinatario,datahora);
 				this.adicionar(m);
+				emitente.adicionarEnviada(m);
+				destinatario.adicionarRecebida(m);
 			} 
 			arquivo3.close();
 		}
 		catch(Exception ex)		{
 			throw new RuntimeException("leitura arquivo de mensagens:"+ex.getMessage());
 		}
-
 	}
 
 
 	public void	salvarObjetos()  {
-		//gravar nos arquivos csv os objetos que est�o no reposit�rio
+		//gravar nos arquivos csv os objetos que estão no repositório
 		try	{
 			File f = new File( new File(".\\mensagens.csv").getCanonicalPath())  ;
 			FileWriter arquivo1 = new FileWriter(f); 
-			for(Mensagem m : mensagens.values()) 	{
+			for(Mensagem m : mensagens) 	{
 				arquivo1.write(	m.getId()+";"+
+						m.getTexto()+";"+
 						m.getEmitente().getNome()+";"+
 						m.getDestinatario().getNome()+";"+
-						m.getTexto()+"\n");	
+						m.getDatahora()+"\n");	
 			} 
 			arquivo1.close();
 		}
 		catch(Exception e){
-			throw new RuntimeException("problema na cria��o do arquivo  mensagens "+e.getMessage());
+			throw new RuntimeException("problema na criação do arquivo  mensagens "+e.getMessage());
 		}
 
 		try	{
@@ -225,7 +250,7 @@ public class Repositorio {
 			arquivo2.close();
 		}
 		catch (Exception e) {
-			throw new RuntimeException("problema na cria��o do arquivo  individuos "+e.getMessage());
+			throw new RuntimeException("problema na criação do arquivo  individuos "+e.getMessage());
 		}
 
 		try	{
@@ -240,7 +265,7 @@ public class Repositorio {
 			arquivo3.close();
 		}
 		catch (Exception e) {
-			throw new RuntimeException("problema na cria��o do arquivo  grupos "+e.getMessage());
+			throw new RuntimeException("problema na criação do arquivo  grupos "+e.getMessage());
 		}
 	}
 

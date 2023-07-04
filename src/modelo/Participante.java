@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class Participante {
 	private String nome;
-	private ArrayList<Mensagem> recebidas;
-	private ArrayList<Mensagem> enviadas;
+	private ArrayList<Mensagem> recebidas = new ArrayList<>();
+	private ArrayList<Mensagem> enviadas = new ArrayList<>();
 	
 	
 	public Participante(String nome) {
@@ -40,6 +40,14 @@ public class Participante {
 	public String getNome() {
 		return nome;
 	}
+	
+	public Mensagem localizarRecebida(int id) {
+		for(Mensagem m : recebidas) {
+			if(m.getId() == id)
+				return m;
+		}
+		return null;
+	}
 
 	public void setNome(String nome) {
 		this.nome = nome;
@@ -63,7 +71,26 @@ public class Participante {
 
 	@Override
 	public String toString() {
-		return "Participante [nome=" + nome + ", recebidas=" + recebidas + ", enviadas=" + enviadas + "]";
+		StringBuilder sb = new StringBuilder();
+		sb.append("Nome = ").append(this.getNome()).append("\n");
+		sb.append(" Mensagens enviadas:");
+		if (this.getEnviadas().isEmpty())
+			sb.append(" sem mensagens enviadas");
+		else {
+			for (Mensagem m : this.getEnviadas()) {
+				sb.append("\n --> ").append(m);
+			}
+		}
+		sb.append("\n Mensagens recebidas:");
+		if (this.getRecebidas().isEmpty())
+			sb.append(" sem mensagens recebidas");
+		else {
+			for (Mensagem m : this.getRecebidas()) {
+				sb.append("\n --> ").append(m);
+			}
+		}
+		return sb.toString();
+		 
 	}
 	
 	

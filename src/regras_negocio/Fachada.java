@@ -1,9 +1,12 @@
 package regras_negocio;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.function.Predicate;
 
 import modelo.Grupo;
 import modelo.Individual;
@@ -15,7 +18,7 @@ public class Fachada {
 	private Fachada() {}
 
 	private static Repositorio repositorio = new Repositorio();
-
+	
 
 	public static void criarIndividuo(String nomeindividuo, String senha) throws  Exception {
 		if(nomeindividuo.isEmpty()) 
@@ -23,21 +26,34 @@ public class Fachada {
 		if(senha.isEmpty()) 
 			throw new Exception("criar individual - senha vazia:");
 		
-		Participante p = repositorio.localizarParticipante(nomeindividuo);	
-		if(p != null) 
-			throw new Exception("criar individual - nome ja existe: " + nomeindividuo);
-		
-		
-		Individual individuo = new Individual(nomeindividuo,senha, false);
-		repositorio.adicionar(individuo);		
+		if(repositorio.getParticipantes().isEmpty()) {
+			Individual individuo = new Individual(nomeindividuo, senha, false);
+			repositorio.adicionar(individuo);	
+			repositorio.salvarObjetos();
+		} 
+		else {
+			Participante p = repositorio.localizarParticipante(nomeindividuo);	
+			if(p != null) 
+				throw new Exception("criar individual - nome ja existe: " + nomeindividuo);
+			
+			Individual individuo = new Individual(nomeindividuo,senha, false);
+			repositorio.adicionar(individuo);
+			repositorio.salvarObjetos();
+		}
 	}
 	
-	public static boolean validarIndividuo(String nomeindividuo, String senha) {
+	public static Individual validarIndividuo(String nomeindividuo, String senha) throws Exception{
 		Individual individuo = repositorio.localizarIndividual(nomeindividuo);
-		if(individuo != null && individuo.getSenha().equals(senha))
-			return true;
-		
-		return false;
+		if(individuo == null) {
+			throw new Exception("validar Individuo - Individuo nao existe: " + nomeindividuo);			
+		} 
+		else {
+			if(senha.equals(individuo.getSenha()))
+				return individuo;
+			else {
+				throw new Exception("validar Individuo - Senha inválida pra esse individuo");
+			}
+		}
 	}
 	
 	public static void criarAdministrador(String nomeadministrador, String senha) throws  Exception {
@@ -46,13 +62,22 @@ public class Fachada {
 		if(senha.isEmpty()) 
 			throw new Exception("criar Administrador - senha vazia:");
 		
-		Participante p = repositorio.localizarParticipante(nomeadministrador);	
-		if(p != null) 
-			throw new Exception("criar Aministrador - nome ja existe: " + nomeadministrador);
-		
-		
-		Individual individuo = new Individual(nomeadministrador,senha, true);
-		repositorio.adicionar(individuo);	
+		if(repositorio.getParticipantes().isEmpty()) {   //verifica se o repositorio de participantes esta vazio e estamos adicionando o primeiro 
+			
+			Individual individuo = new Individual(nomeadministrador, senha, true);
+			repositorio.adicionar(individuo);	
+			repositorio.salvarObjetos();
+		}
+		else {
+			Participante p = repositorio.localizarParticipante(nomeadministrador);	
+			if(p != null) 
+				throw new Exception("criar Aministrador - nome ja existe: " + nomeadministrador);
+			
+			
+			Individual individuo = new Individual(nomeadministrador,senha, true);
+			repositorio.adicionar(individuo);
+			repositorio.salvarObjetos();
+		}
 	}
 	
 	public static void criarGrupo(String nomegrupo) throws  Exception{
@@ -62,8 +87,16 @@ public class Fachada {
 		if(repositorio.localizarGrupo(nomegrupo) != null) 
 			throw new Exception("criar Grupo - nome ja existe: " + nomegrupo);
 		
-		Grupo grupo = new Grupo(nomegrupo);
-		repositorio.adicionar(grupo);	
+		if(repositorio.getParticipantes().isEmpty()) {
+			Grupo grupo= new Grupo(nomegrupo);
+			repositorio.adicionar(grupo);
+			repositorio.salvarObjetos();
+		}
+		else {
+			Grupo grupo = new Grupo(nomegrupo);
+			repositorio.adicionar(grupo);	
+			repositorio.salvarObjetos();			
+		}
 	}
 	
 	public static void inserirGrupo(String nomeindividuo, String nomegrupo) throws  Exception {
@@ -87,6 +120,7 @@ public class Fachada {
 			//adicionar individuo com o grupo e vice-versa
 			ind.adicionar(grupo);
 			grupo.adicionar(ind);
+			repositorio.salvarObjetos();
 		} 
 		else
 			throw new Exception("inserir Grupo - o individuo ja esta no grupo");
@@ -113,6 +147,7 @@ public class Fachada {
 			//remover individuo com o grupo e vice-versa
 			ind.remover(grupo);
 			grupo.remover(ind);
+			repositorio.salvarObjetos();
 		}
 		else	
 			throw new Exception("remover Grupo - o individuo nao esta no grupo");
@@ -134,19 +169,35 @@ public class Fachada {
 			throw new Exception("criar mensagem - grupo nao permitido: " + nomedestinatario);
 		
 		
-		//cont.
-		//gerar id no repositorio para a mensagem
-		//int id = repositorio.gerarIdMensagem();
-		//criar mensagem
-		//Mensagem mensagem = new Mensagem(id, emitente, destinatario, texto);
-		//adicionar mensagem ao emitente e destinatario
-		//emitente.adicionarEnviada(mensagem);
-		//destinatario.adicionarRecebida(mensagem);
-		//adicionar mensagem ao repositorio
-		//repositorio.adicionar(mensagem);
-		//
-		//caso destinatario seja tipo Grupo então criar copias da mensagem, tendo o grupo como emitente e cada membro do grupo como destinatario, 
-		//  usando mesmo id e texto, e adicionar essas copias no repositorio
+		int cont = repositorio.GerarId();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+		String formattedDateTime = formatter.format(LocalDateTime.now());
+		
+		if (destinatario instanceof Grupo g ) {
+			Mensagem mensagem= new Mensagem(cont,texto,emitente,g,LocalDateTime.parse(formattedDateTime, formatter));
+			emitente.adicionarEnviada(mensagem);
+			g.adicionarRecebida(mensagem);
+			repositorio.adicionar(mensagem);
+			
+			//verifica se nesse caso estamos enviando uma mensagem para um destinatario tipo Grupo 
+			//CRIACAO DE COPIAS
+			for(Individual i : g.getIndividuos()) {
+				if(i.getNome() != emitente.getNome()){ //verificao pra mandar msg no grupo caso seja diferente do emitente (no grupo)
+				Mensagem msg= new Mensagem(cont,emitente.getNome()+"/"+texto,g,i,LocalDateTime.parse(formattedDateTime, formatter)); 
+				g.adicionarEnviada(msg);
+				i.adicionarRecebida(msg); 
+				repositorio.adicionar(msg); //adicionando ao repositorio
+				repositorio.salvarObjetos();
+				}
+			}
+		}
+		else {
+		Mensagem mensagem = new Mensagem(cont,texto,emitente,destinatario,LocalDateTime.parse(formattedDateTime, formatter)); //cria objeto de mensagem relacionando emitente e dest
+		emitente.adicionarEnviada(mensagem); //adiciono objeto mensagem no enviados do emitente
+		destinatario.adicionarRecebida(mensagem); //adiciono objeto mensagem no recebidos do destinatario
+		repositorio.adicionar(mensagem); //adiciona msg no repositorio 
+		repositorio.salvarObjetos();
+		}
 		
 	}
 	
@@ -174,7 +225,7 @@ public class Fachada {
 		}
 		//Adicionar na conversa as mensagens da lista recebidas cujo emitente é igual ao parametro destinatario
 		for(Mensagem m : recebidas) {
-			if(m.getDestinatario().getNome().equals(nomedestinatario))
+			if(m.getEmitente().getNome().equals(nomedestinatario))
 				conversa.add(m);
 		}
 		
@@ -198,27 +249,27 @@ public class Fachada {
 			throw new Exception("apagar mensagem - mensagem nao pertence a este individuo:" + id);
 		
 		emitente.removerEnviada(m);
+		
 		Participante destinatario = m.getDestinatario();
-		destinatario.removerRecebida(m);
-		repositorio.remover(m);	
 		
 		if(destinatario instanceof Grupo g) {
-			ArrayList<Mensagem> lista = destinatario.getEnviadas();
-			lista.removeIf(new Predicate<Mensagem>() {
-				@Override
-				public boolean test(Mensagem t) {
-					if(t.getId() == m.getId()) {
-						t.getDestinatario().removerRecebida(t);
-						repositorio.remover(t);	
-						return true;		//apaga mensagem da lista
-					}
-					else
-						return false;
+			g.removerRecebida(m);
+			repositorio.remover(m);
+			
+			for(Mensagem msg : g.getEnviadas()) {
+				if(msg.getId()==m.getId())
+				{
+					g.removerEnviada(msg);
+					msg.getDestinatario().removerRecebida(msg);
+					repositorio.remover(msg);
 				}
 				
-			});
-			
+			}
+			repositorio.salvarObjetos();
 		}
+		destinatario.removerRecebida(m);
+		repositorio.remover(m);	
+		repositorio.salvarObjetos();
 	}
 	
 	public static ArrayList<Mensagem> listarMensagensEnviadas(String nomeindividuo) throws Exception {
@@ -245,7 +296,7 @@ public class Fachada {
 		return repositorio.getGrupos();
 	}
 	
-	public static ArrayList<Mensagem> listarMensagens() {
+	public static Collection<Mensagem> listarMensagens() {
 		return repositorio.getMensagens();
 	}
 
@@ -271,7 +322,7 @@ public class Fachada {
 			for(Mensagem m : repositorio.getMensagens()) {
 				String[] array = m.getTexto().split("");
 				for(String s : array) {
-					if(s == termo)
+					if(s.equals(termo))
 						msgs.add(m);
 				}
 			}
@@ -292,7 +343,7 @@ public class Fachada {
 			throw new Exception("ausentes - " + nomeadministrador + " nao é um administrador!");
 		
 		//listar os nomes dos participante que nao enviaram mensagens
-		ArrayList<Participante> users = repositorio.getParticipantes();
+		Collection<Participante> users = repositorio.getParticipantes().values();
 		ArrayList<String> lista = new ArrayList<>();
 		
 		for(Participante i : users) {
@@ -303,5 +354,6 @@ public class Fachada {
 		
 		return lista;
 	}
+	
 
 }

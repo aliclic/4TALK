@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Individual extends Participante {
 	private String senha;
 	private boolean administrador;
-	private ArrayList<Grupo> grupos;
+	private ArrayList<Grupo> grupos = new ArrayList<>();
 	
 	public Individual(String nome, String senha, boolean administrador) {
 		super(nome);
@@ -52,11 +52,20 @@ public class Individual extends Participante {
 	public void setGrupos(ArrayList<Grupo> grupos) {
 		this.grupos = grupos;
 	}
-
+	
 	@Override
 	public String toString() {
-		return "Individual [senha=" + senha + ", administrador=" + administrador + ", grupos=" + grupos + "]";
+		StringBuilder sb = new StringBuilder();
+		sb.append(super.toString());
+		sb.append("\n grupos:");
+		if (this.grupos.isEmpty()) {
+			sb.append(" sem grupo");
+		} else {
+			for (Grupo g : this.getGrupos()) {
+				sb.append("\n --> ").append(g.getNome()).append("\n");
+			}
+		}
+		return sb.toString();
 	}
 
-	
 }

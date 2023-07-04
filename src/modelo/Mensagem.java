@@ -9,11 +9,12 @@ public class Mensagem {
 	private Participante destinatario;
 	private LocalDateTime datahora;
 	
-	public Mensagem (int id, Participante emitente, Participante destinatario, String texto) {
+	public Mensagem (int id, String texto, Participante emitente, Participante destinatario, LocalDateTime datahora) {
 		this.id = id;
+		this.texto = texto;
 		this.emitente = emitente;
 		this.destinatario = destinatario;
-		this.texto = texto;
+		this.datahora = datahora;
 	}
 
 	public int getId() {
@@ -58,9 +59,9 @@ public class Mensagem {
 
 	@Override
 	public String toString() {
-		return "Mensagem [id:" + id + ", emitente=" + emitente + ", destinatario=" + destinatario
-				+ ", datahora=" + datahora + ", texto=" + texto + "]";
+		return id + ": emitente = " + emitente.getNome() + ", destinatario = " + destinatario.getNome() + ", datahora = " + datahora + ", texto = " + texto;
 	}
+	
 	
 	
 }

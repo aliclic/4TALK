@@ -192,22 +192,14 @@ public class Repositorio {
 			Participante emitente,destinatario;
 			File f = new File( new File(".\\mensagens.csv").getCanonicalPath() )  ;
 			Scanner arquivo3 = new Scanner(f);	 //  pasta do projeto
-			String inputFormat = "yyyy-MM-dd'T'HH:mm:ss";
-	        String outputFormat = "dd/MM/yyyy HH:mm:ss";
-
-	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern(inputFormat);
-	        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(outputFormat);
 			while(arquivo3.hasNextLine()) 	{
 				linha = arquivo3.nextLine().trim();		
 				partes = linha.split(";");	
-				//System.out.println(Arrays.toString(partes));
 				id = Integer.parseInt(partes[0]);
 				texto = partes[1];
 				nomeemitente = partes[2];
 				nomedestinatario = partes[3];
-				LocalDateTime dateTime = LocalDateTime.parse(partes[4], inputFormatter);
-		        String formattedOutputDate = dateTime.format(outputFormatter);
-				datahora = LocalDateTime.parse(formattedOutputDate, outputFormatter);
+				datahora = LocalDateTime.parse(partes[4], DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss"));
 				emitente = this.localizarParticipante(nomeemitente);
 				destinatario = this.localizarParticipante(nomedestinatario);
 				m = new Mensagem(id,texto,emitente,destinatario,datahora);
@@ -234,6 +226,7 @@ public class Repositorio {
 						m.getEmitente().getNome()+";"+
 						m.getDestinatario().getNome()+";"+
 						m.getDatahora()+"\n");	
+				
 			} 
 			arquivo1.close();
 		}

@@ -170,11 +170,9 @@ public class Fachada {
 		
 		
 		int cont = repositorio.GerarId();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-		String formattedDateTime = formatter.format(LocalDateTime.now());
 		
 		if (destinatario instanceof Grupo g ) {
-			Mensagem mensagem= new Mensagem(cont,texto,emitente,g,LocalDateTime.parse(formattedDateTime, formatter));
+			Mensagem mensagem= new Mensagem(cont,texto,emitente,g,LocalDateTime.now());
 			emitente.adicionarEnviada(mensagem);
 			g.adicionarRecebida(mensagem);
 			repositorio.adicionar(mensagem);
@@ -183,7 +181,7 @@ public class Fachada {
 			//CRIACAO DE COPIAS
 			for(Individual i : g.getIndividuos()) {
 				if(i.getNome() != emitente.getNome()){ //verificao pra mandar msg no grupo caso seja diferente do emitente (no grupo)
-				Mensagem msg= new Mensagem(cont,emitente.getNome()+"/"+texto,g,i,LocalDateTime.parse(formattedDateTime, formatter)); 
+				Mensagem msg= new Mensagem(cont,emitente.getNome()+"/"+texto,g,i,LocalDateTime.now()); 
 				g.adicionarEnviada(msg);
 				i.adicionarRecebida(msg); 
 				repositorio.adicionar(msg); //adicionando ao repositorio
@@ -192,7 +190,7 @@ public class Fachada {
 			}
 		}
 		else {
-		Mensagem mensagem = new Mensagem(cont,texto,emitente,destinatario,LocalDateTime.parse(formattedDateTime, formatter)); //cria objeto de mensagem relacionando emitente e dest
+		Mensagem mensagem = new Mensagem(cont,texto,emitente,destinatario,LocalDateTime.now()); //cria objeto de mensagem relacionando emitente e dest
 		emitente.adicionarEnviada(mensagem); //adiciono objeto mensagem no enviados do emitente
 		destinatario.adicionarRecebida(mensagem); //adiciono objeto mensagem no recebidos do destinatario
 		repositorio.adicionar(mensagem); //adiciona msg no repositorio 

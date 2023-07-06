@@ -1,8 +1,6 @@
 package regras_negocio;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -212,7 +210,7 @@ public class Fachada {
 		//obter do emitente a lista  enviadas
 		ArrayList<Mensagem> enviadas = emitente.getEnviadas();
 		//obter do emitente a lista  recebidas
-		ArrayList<Mensagem> recebidas = emitente.getRecebidas();
+		ArrayList<Mensagem> enviadas2 = destinatario.getRecebidas();
 		
 		//criar a lista conversa
 		ArrayList<Mensagem> conversa = new ArrayList<>();
@@ -223,8 +221,8 @@ public class Fachada {
 				conversa.add(m);
 		}
 		//Adicionar na conversa as mensagens da lista recebidas cujo emitente é igual ao parametro destinatario
-		for(Mensagem m : recebidas) {
-			if(m.getEmitente().getNome().equals(nomedestinatario))
+		for(Mensagem m : enviadas2) {
+			if(m.getDestinatario().getNome().equals(nomeindividuo))
 				conversa.add(m);
 		}
 		
@@ -342,7 +340,7 @@ public class Fachada {
 			throw new Exception("ausentes - " + nomeadministrador + " nao é um administrador!");
 		
 		//listar os nomes dos participante que nao enviaram mensagens
-		Collection<Participante> users = repositorio.getParticipantes().values();
+		Collection<Participante> users = repositorio.getParticipantes();
 		ArrayList<String> lista = new ArrayList<>();
 		
 		for(Participante i : users) {

@@ -86,8 +86,13 @@ public class Repositorio {
 		return null;
 	}
 	
-	public TreeMap<String, Participante> getParticipantes() {
-		return participantes;
+	public ArrayList<Participante> getParticipantes() {
+		ArrayList<Participante> part = new ArrayList<>();
+		
+		for(Participante p : participantes.values()) {
+			part.add(p);
+		}
+		return part;
 	}
 	
 	public ArrayList<Individual> getIndividuos() {
